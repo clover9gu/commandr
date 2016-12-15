@@ -128,6 +128,18 @@ import inspect
 import itertools
 from optparse import OptionParser, SUPPRESS_HELP
 import sys
+import functools
+
+def cmp(x, y):
+    """
+    Replacement for built-in funciton cmp that was removed in Python 3
+
+    Compare the two objects x and y and return an integer according to
+    the outcome. The return value is negative if x < y, zero if x == y
+    and strictly positive if x > y.
+    """
+
+    return (x > y) - (x < y)
 
 class CommandInfo(
   namedtuple('BaseCommandInfo',
@@ -462,7 +474,7 @@ class Commandr(object):
     # Populates defaults iff there is a default
     defaults_dict = {}
     if argspec.defaults:
-      for i in xrange(1, len(argspec.defaults) + 1):
+      for i in range(1, len(argspec.defaults) + 1):
         defaults_dict[argspec.args[-i]] = argspec.defaults[-i]
 
     for arg in argspec.args:
@@ -614,7 +626,7 @@ class Commandr(object):
       by_order = cmp(appear_order.index(a.name), appear_order.index(b.name))
       return by_cat or by_order
 
-    for command in sorted(self._command_list, _compare_commands):
+    for command in sorted(self._command_list, key=functools.cmp_to_key(_compare_commands)):
       if command.category != last_category:
         print("%s Commands:" % (command.category or "General"))
         last_category = command.category
